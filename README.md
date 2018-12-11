@@ -1,9 +1,11 @@
-# spectralExponent
+# Spectral Exponent
 
 
 this code allows to compute the spectral exponent of the resting EEG, based on the Power Spectral Density (PSD), over a given scaling region.
 
 The spectral exponent describes the decay of the PSD. it is computed as the slope of an OLS line, fit on log-freq vs log-PSD, excluding oscillatory peaks (and their base).
+
+![figure 1 fit steps](https://user-images.githubusercontent.com/6671316/49792598-72717e00-fd33-11e8-993c-0430313dee43.png)
 
 ## USAGE EXAMPLE:
 ````matlab
