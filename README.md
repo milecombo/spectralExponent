@@ -13,13 +13,12 @@ The spectral exponent describes the decay of the PSD. it is computed as the slop
 % sRate: sampling Rate, e.g. 1450 for Nexstim
 % myEEGch: a vector of datapoints.  
 
-% here a dummy example, generating 5 minutes of data, with a 1/f^2 decay, alpha and beta oscillations
-%  first compute the PSD
+% here, we generate 5 minutes of dummy data, with a 1/f^2 decay, alpha and beta oscillations
 sRate= 1450;
 dataPoints= 1: sRate*5*60 +2*sRate;
-myEEGch=  randn(1,dataPoints(end));
+myEEGch=  randn(1,dataPoints(end)); 
 myEEGch= smooth( myEEGch, sRate*2)'; 
-for ff= [ 9:0.05:11  18:0.05:24]
+for ff= [ 9:0.05:11  18:0.05:24] 
     myEEGch= myEEGch+ sin( 2*pi*ff/sRate.*dataPoints)/20/(ff^2); 
 end 
 myEEGch= myEEGch(sRate+1:end-sRate);
