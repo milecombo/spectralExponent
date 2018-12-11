@@ -12,25 +12,16 @@ The spectral exponent describes the decay of the PSD. it is computed as the slop
 % first compute the PSD
 
  epLen= 2* sRate; epShift= 1*srate;numFFT=[];
- 
  [myPSD,frex]= pwelch( myEEGch  , epLen, epShift,numFFT, sRate); 
  
  frBand=[1 40];
- 
  frBins= dsearchn( frex, frBand(1) ):  dsearchn( frex, frBand(2));
- 
  XX= frex(frBins);
- 
  YY= myPSD(frBins);
- 
  robRegMeth= 'ols'; % method to perform linear regression. see >> help robustfit
- 
  doPlot= 1; 
- 
  thisCol= [0 0 1];
- 
  [intSlo, stat, Pows, Deviants,  stat0, intSlo0] = fitPowerLaw3steps(XX,YY, robRegMeth,  doPlot, thisCol)
- 
  spectralExponent= intSlo(2);
  
  % repeat for every electrode to obtain the average spectral exponent across the scalp
@@ -38,13 +29,9 @@ The spectral exponent describes the decay of the PSD. it is computed as the slop
 %% fitPowerLaw3steps %%
 
 %%%%%%%%% INPUT 
-
 % XX ---> are the frequency bins of interest (hz)
-
 % YY ---> are the PSD relative to the bins of interest (mV^2 /Hz)
-
 % robRegMeth --->is the method for robust regression fit (default: ols)
-
 %                type help robustfit for more details
 % doPlot  --->    0 (default) means no plot ; 
 %                 1 is plot XX and YY on log-log scale;  
