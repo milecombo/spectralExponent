@@ -9,9 +9,17 @@ The spectral exponent describes the decay of the PSD. it is computed as the slop
 
 ## USAGE EXAMPLE:
 ````matlab
-% first compute the PSD
+% you should have in your workspace
+% sRate: sampling Rate, e.g. 1450 for Nexstim
+% myEEGch: a vector of datapoints.  
+% here a dummy example, generating data
+sRate= 1450;
+myEEGch=  randn(1,sRate*5*60);
+myEEGch= smooth( myEEGch, sRate)'; 
+myEEGch= myEEGch+ sin( [1:sRate*5*60]./pi/7)/300;
 
- epLen= 2* sRate; epShift= 1*srate;numFFT=[];
+% first compute the PSD
+ epLen= 2* sRate; epShift= 1*sRate;numFFT=[];
  [myPSD,frex]= pwelch( myEEGch  , epLen, epShift,numFFT, sRate); 
  
  frBand=[1 40];
