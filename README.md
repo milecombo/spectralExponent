@@ -4,11 +4,17 @@ this code allows to compute the spectral exponent of the resting EEG, based on t
 The spectral exponent describes the decay of the PSD. it is computed as the slope of an OLS line, fit on log-freq vs log-PSD, excluding oscillatory peaks (and their base).
 
 % USAGE EXAMPLE:
+
 % first compute the PSD
+
  epLen= 2* sRate; epShift= 1*srate;numFFT=[];
+ 
  [myPSD,frex]= pwelch( myEEGch  , epLen, epShift,numFFT, sRate); 
+ 
  frBand=[1 40];
+ 
  frBins= dsearchn( frex, frBand(1) ):  dsearchn( frex, frBand(2));
+ 
  XX= frex(frBins);
  YY= myPSD(frBins);
  robRegMeth= 'ols'; % method to perform linear regression. see >> help robustfit
