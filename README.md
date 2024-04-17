@@ -1,4 +1,5 @@
 # Spectral Exponent
+### a.k.a. spectral slope, power-law slope, PSD slope, slope of the aperiodic component, 1/f exponent
 
 
 this code allows to compute the spectral exponent of the resting EEG, based on the Power Spectral Density (PSD), over a given scaling region.
@@ -83,20 +84,92 @@ myEEGch= myEEGch(sRate+1:end-sRate);
 ````
 
 ## HOW DOES IT WORK?
-first transform PSD (YY) and frequencies (XX) in log-log and upsample them by 4 times
+#### • log10 transform of both PSD and Frequency, and resample evenly in the log-log graph
+First transform PSD (YY) and frequencies (XX) each by log10, 
+resample the values using logarithmically spaced bins (upsample 4x to obtain PSD bins evenly sampled in the loglog space)
 
-fit a 1st line, find all the residual >0
+#### • fit a first-guess/naive line 
+A 1st order ordinary least square, or "best fitting straight line", is fit under the log-log axes
 
-small peaks (whose residuals are smaller than 1*mad(residuals)) do not count as peaks
+#### • Discard frequency bins with large peaks and adjacent bins above the first line
+Find all the residual >0 (i.e. bins emerging from the naive power-law fit). Only large peaks (whose residuals are larger than 1*mad(residuals)) count as proper peaks.
+Find clusters of bins with residuals >0, and consider only those clusters of frequency bins where there is a peak, for subsequent rejection.
+i.e. reject large enough peaks (large residuals well above the naive power-law trend, where residuals > mad(residuals) ) 
+along with the base of the peaks (adjacent bins till above the naive power-law trend, where residuals >0)
 
-find clusters of rejected frequency bins 
+#### • fit a second and final line, on bins sufficiently resembling a power-law 
+Perform the fit only on the remaining residuals (those closer to a power-law)
 
-consider only clusters of frequency bins where there is a peak
+#### • the slope of this second line is the spectral exponent
+indexing the decay of the PSD over frequencies.
+statistics relative to the fit are also assessed
 
-i.e. reject large enough peaks and their base (adjacent residuals >0)
 
-fit a second line, on the remaining residuals (those closer to a power-law)
+## SCIENTIFIC REFERENCES
+Scientific References where we employed the present code to estimate the spectral exponent. 
+#### • General Anesthesia
+the first article of the series, the EEG spectral slope reflects the presence/absence of consciousness (according to delayed reports)
+across anesthetic agents all tailored to reach complete behavioural unresponsiveness,
+discriminating cases of unconsciousness (during propofol and xenon anesthesia) 
+against baseline wakefulness and cases of sensorimotor disconnection from the environment (during ketamine)
+```` 
+Colombo, M. A., Napolitani, M., Boly, M., Gosseries, O., Casarotto, S., Rosanova, M., ... & Sarasso, S. (2019).
+The spectral exponent of the resting EEG indexes the presence of consciousness
+during unresponsiveness induced by propofol, xenon, and ketamine.
+NeuroImage, 189, 631-644.
+````
+[link to Neuroimage article](https://doi.org/10.1016/j.neuroimage.2019.01.024).
 
-the slope of the second line is the spectral exponent. 
 
-get statistics relative to the fit
+
+#### • Severe Brain Injury
+The EEG spectral exponent (dubbed spectral gradient) reflects the presence/absence of consciousness
+in severe brain-injury with Disorders of Cosnciousness, in conscious patients with brain injury,
+and even in cases of sensorimotor disconnection from the environment: 
+those patients with unresponsive wakefulness syndrome (vegetative state) that nonetheless show capacity for consciousness,
+as shown by complex reactivity to direct cortical perturbation,
+(i.e. high values of Perturbational Complexity Index (PCI), assessed from TMS-EEG)
+
+```` 
+Colombo, M. A., Comanducci, A., Casarotto, S., Derchi, C. C., Annen, J., Viganò, A., ... & Rosanova, M. (2023).
+Beyond alpha power: EEG spatial and spectral gradients robustly stratify disorders of consciousness.
+Cerebral cortex, 33(11), 7193-7210.
+````
+[link to Cerebral cortex article](https://doi.org/10.1093/cercor/bhad031).
+
+
+#### • Human development
+Wake and light-sleep EEG aperiodic activity diverge from deep sleep activity over age from infants to adolescents.
+EEG Spectral exponent flattens from infants to adolescent during wakefulness and light sleep, 
+while the spread between wake and sleep values become progressively larger;
+further, the hot-spot where the PSD is the slowest migrates following a postero-anterior gradient over age.
+
+````
+Favaro, J., Colombo, M. A., Mikulan, E., Sartori, S., Nosadini, M., Pelizza, M. F., ... & Toldo, I. (2023). 
+The maturation of aperiodic EEG activity across development reveals a progressive differentiation of wakefulness from sleep. 
+NeuroImage, 277, 120264.
+````
+[link to Neuroimage article](10.1016/j.neuroimage.2023.120264)
+
+
+#### • Cortical Stroke
+EEG Spectral exponent in patients with stroke (in a regimen of values compatible with consciousness) 
+discriminate the lesioned from the contralateral hemisphere,
+and correlate with clinical indexes of stroke recovery
+
+````
+Lanzone, J., Colombo, M. A., Sarasso, S., Zappasodi, F., Rosanova, M., Massimini, M., ... & Assenza, G. (2022).
+EEG spectral exponent as a synthetic index for the longitudinal assessment of stroke recovery. 
+Clinical Neurophysiology, 137, 92-101.
+````
+[link to Clinical Neurophysiology article](https://doi.org/10.1016/j.clinph.2022.02.022).
+
+## OTHER RESOURCES
+A good place explaining the basics; a brief description of the distinction between aperiodic and periodic activity
+
+[link to blog](https://sapienlabs.org/lab-talk/eeg-and-depth-of-anesthesia/)
+
+A youtube video where I present the findings of the EEG spectral exponent during various anesthetic protocols (Colombo et al., 2019)
+
+[link to video](https://www.youtube.com/watch?v=d7csRxa1nCI)
+
