@@ -1,6 +1,7 @@
 # Spectral Exponent
 ### a.k.a. spectral slope, power-law slope, PSD slope, slope of the aperiodic component, 1/f exponent
 
+## UPDATE >>> PYTHON TRANSLATION NOW AVAILABLE<<<
 
 this code allows to compute the spectral exponent of the resting EEG, based on the Power Spectral Density (PSD), over a given scaling region.
 
@@ -10,7 +11,7 @@ The spectral exponent describes the decay of the PSD. it is computed as the slop
 
 (Note: while the Y axis label reads as mV^2/Hz, it should really read µ^2/Hz. Thus, the proper version should be microVolt (and not milliVolt) squared over Hz.
 
-## USAGE EXAMPLE:
+## USE EXAMPLE (MATLAB)
  you should have in your workspace:
  
      sRate: sampling Rate, e.g. 1450 for Nexstim amplifier
@@ -107,6 +108,58 @@ and estimate the spectral exponent in a given frequency range (1-40 Hz)
 % intSlo(1) intercept of 2nd (final) powerLaw Fit
 % intSlo(2) slope of 2nd (final) powerLaw Fit
 ````
+
+## USE EXAMPLE (PYTHON)
+First, generate an EEG-looking signal
+````python
+# # HOW TO USE THIS CODE ON A GENERATED EEG SIGNAL
+
+from scipy.signal import welch
+def dsearchn(x, value):
+    dist_from_value = np.abs(x-value)
+    return np.where(dist_from_value == dist_from_value.min())[0][0]
+
+################################### SIGNAL GENERATION ###################################
+
+# generate noise data (a sum of sinusoids with random phase) with a given PSD exponent (-1.5)
+fs = 1000 #sampling rate in Hz
+time = np.arange(60, step=1/fs)
+freqs = np.linspace(0.5,fs/2,10000)
+exponent=-1.5
+
+signal = np.zeros(time.shape)
+for f in range(len(freqs)):
+    power = freqs[f]**(exponent)
+    signal += np.sqrt(power)*np.sin(2*np.pi*freqs[f]*time + np.random.uniform()*2*np.pi)
+
+# add to the noise alpha and beta oscillations, leading to two bell-shaped peaks in the PSD
+pks= np.array([[8, 13], [16, 24]])
+for fb in range(len(pks)):
+    ampFac= np.hamming(200)
+    ffs= np.linspace(pks[fb,0] , pks[fb,1], 200)
+    for ii in range(len(ffs)):
+        amp = 60/(ffs[ii]**1.75)*ampFac[ii] #90 **2
+        signal += amp * np.sin(2*np.pi*ffs[ii]*time + np.random.uniform()*2*np.pi)
+        
+########## Compute the PSD and estimate the exponent in the range 1 to 40 Hz ########## 
+````
+now that you have generated a fake signal (or imported a real signal), you can compute the PSD and estimate the spectral exponent in a given frequency range (1-40 Hz)
+
+````python
+#PSD
+frex, psd_1chan = welch(signal, fs=fs, nperseg=fs*3, noverlap=fs*2, detrend='linear')
+frband = [1, 40]
+frBins = np.arange(dsearchn(frex, frband[0]), dsearchn(frex, frband[1])+1)
+XX = frex[frBins]
+# spectral exponent
+YY = psd_1chan[frBins]
+plt.figure(dpi=300, figsize=(4,4))
+slope, inter, stats, vectors = compute_SpectralExponent(XX, YY, do_plot=True)
+
+````
+
+
+
 
 ## HOW DOES IT WORK?
 #### • log10 transform of both PSD and Frequency, and resample evenly in the log-log graph
