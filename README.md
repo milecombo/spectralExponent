@@ -21,6 +21,7 @@ The spectral exponent describes the decay of the PSD. it is computed as the slop
      % if low-pass filter (butter order 5) is set at 60 Hz, then stop fitting at approximately 45 Hz. 
      % Better even, do NOT use any low-pass
 
+Or, for the sake of quickly testing this code, you can generate 1 minute of an EEG-looking signal
 ````matlab
 %%%%%%%%%%%%%%%%%%%%%%%%%%% FAKE SIGNAL GENERATION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% generate signal data (a sum of sinusoids with random phase) with a given PSD exponent (-1,5)
@@ -110,7 +111,7 @@ and estimate the spectral exponent in a given frequency range (1-40 Hz)
 ````
 
 ## USE EXAMPLE (PYTHON)
-First, generate an EEG-looking signal
+First, generate 1 minute of an EEG-looking signal ( or use one channel of your own clean EEG signal)
 ````python
 # # HOW TO USE THIS CODE ON A GENERATED EEG SIGNAL
 
@@ -168,7 +169,7 @@ The second and final fit (in the legend> slope 1-40 Hz, blue dotted line) , by e
  and its slope is much closer to the theoretical value (not exact, each simulation gives slightly different values).
 
 
-## HOW DOES IT WORK?
+# HOW DOES IT WORK?
 #### • log10 transform of both PSD and Frequency, and resample evenly in the log-log graph
 First transform PSD (YY) and frequencies (XX) each by log10, 
 resample the values using logarithmically spaced bins (upsample 4x to obtain PSD bins evenly sampled in the loglog space)
@@ -189,8 +190,36 @@ Perform the fit only on the remaining residuals (those closer to a power-law)
 indexing the decay of the PSD over frequencies.
 statistics relative to the fit are also assessed
 
+# THINGS TO CONSIDER BEFORE FITTING THE SPECTRAL EXPONENT 
+### (regardless of the specific method/code/toolbox you chose, published here or elsewhere)
+#### • Beware which filters you applied to your data.
+Obviously, temporal filters distort the shape of the PSD. Their effect is best estimated by directly comparing the PSD before and after filtering.
+A high-pass filter is often used to remove long drift in the signal. 
+However, if the high-pass cutoff is high (>=1 Hz) or the filter-order is low (e.g. 3), this may induce a shoulder to the left of your PSD which extends into the standard fitting range (above 1 Hz).
+Further, if the low-pass cutoff is low (<=60 Hz) or the filter-order is low (e.g. 3), this may induce a shoulder to the right of your PSD which extends to the standard fitting range ( below 40 Hz).
+Recommended filter settings:
+• High-pass: Butter iir high-pass 0.5 Hz, 5th order. to avoid distortions above 1 Hz (a sharp roll-on)
+• Low-pass: no low-pass, or above 60 Hz to avoid distortions below 40 Hz (a smooth roll-off)
 
-## SCIENTIFIC REFERENCES
+#### • Beware of artifacts !
+• EOG artifacts induce a big bump to the left of your PSD (most of the power below ~4 Hz), increasing the slope and intercept of the fit. 
+• EMG artifacts induce a bump to the right of your PSD (most of the power above ~20 Hz), flattening the slope and decreasing the intercept of the fit. 
+EOG and EMG artifacts must be throroughly cleaned before estimating the spectral exponent (for instance , using Independent Component Analysis).
+
+#### • Dealing with bad epochs
+Bad segments (such as movements, chewing etc.) should be marked, and attention must be paid to avoid biasing PSD estimates (i.e.jumps in the signal are generated if bad-epochs are extruded from the data, by concatenating good epochs, leading to spurious extra power at several high- or mixed-freqeuncies). One may estimate the PSD using the Welch's method "explicity" (estimating the PSD over each single periodogram/ temporal window, with a given temporal overlap), and reject those windows where any datapoint belonging to a bad-segment is present, before averaging the PSD across periodograms (the pwelch method returns the periodograms-average PSD only, not the PSD of individual periodograms). 
+In other words, each periodogram must always include only good data-points (no artifacts), and temporally adjacent time points (no time jumps).
+Obviously, bad epochs induce much larger PSD distortion than the concatenation of good epochs, but the latter strategy is best avoided.
+
+#### • Frequency Fitting Range
+The EEG typicaly displays an overall 1/f-like PSD decay in the 1-40 Hz range, above which the oscillatory activity induces various peaks in the theta-alpha-sigma or beta range.
+The EEG PSD shows two slightly different trends in the 1-20 Hz and in the 20-40 Hz range, with a bend near 20 Hz (difficult to pinpoint due to oscillatory activity in alpha and beta frequencies).
+Changing the fitting range should be done carefully, according to the signal properties, upon close inspection of the PSD in loglog axes.
+For instance, intracranial EEG may sometimes show a PSD where the decay begins at higher frequencies (e.g. 2 Hz), or the decay extends to a higher freqeuncy range. 
+Sometimes, one may want to consider fitting even lower frequencies, if proper cleaning, filters and the PSD-shape allow.
+
+
+# SCIENTIFIC REFERENCES
 Scientific References where we employed the present code to estimate the spectral exponent. 
 #### • General Anesthesia
 the first article of the series, the EEG spectral slope reflects the presence/absence of consciousness (according to delayed reports)
