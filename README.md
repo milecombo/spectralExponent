@@ -8,6 +8,8 @@ The spectral exponent describes the decay of the PSD. it is computed as the slop
 
 ![figure 1 fit steps](https://user-images.githubusercontent.com/6671316/49792598-72717e00-fd33-11e8-993c-0430313dee43.png)
 
+(Note: while the Y axis label reads as mV^2/Hz, it should really read µ^2/Hz. Thus, the proper version should be microVolt (and not milliVolt) squared over Hz.
+
 ## USAGE EXAMPLE:
 ````matlab
 % you should have in your workspace
@@ -26,7 +28,7 @@ myEEGch= myEEGch(sRate+1:end-sRate);
 
 
 % first compute the PSD
- epLen= 2* sRate; epShift= 1*sRate;numFFT=[];
+ epLen= 3* sRate; epShift= 1*sRate;numFFT=[];
  [myPSD,frex]= pwelch( myEEGch  , epLen, epShift,numFFT, sRate); 
  
  frBand=[1 40];
