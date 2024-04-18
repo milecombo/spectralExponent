@@ -11,25 +11,48 @@ The spectral exponent describes the decay of the PSD. it is computed as the slop
 (Note: while the Y axis label reads as mV^2/Hz, it should really read µ^2/Hz. Thus, the proper version should be microVolt (and not milliVolt) squared over Hz.
 
 ## USAGE EXAMPLE:
+ you should have in your workspace:
+ 
+     sRate: sampling Rate, e.g. 1450 for Nexstim amplifier
+    signal: one EEG channel, a vector of datapoints.  
+     % use one eeg channel after preprocessing and filtering (but be aware of how filters impact the psd)
+     % if high-pass filter (butter order 5) is set at 0.5 Hz, then begin fitting at 1 Hz
+     % if low-pass filter (butter order 5) is set at 60 Hz, then stop fitting at approximately 45 Hz. 
+     % Better even, do NOT use any low-pass
+
 ````matlab
-% you should have in your workspace
-% sRate: sampling Rate, e.g. 1450 for Nexstim
-% myEEGch: a vector of datapoints.  
+%%%%%%%%%%%%%%%%%%%%%%%%%%% FAKE SIGNAL GENERATION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% generate signal data (a sum of sinusoids with random phase) with a given PSD exponent (-1,5)
+sRate= 1000;
+freqs= linspace( .5, sRate/2, 10000);
+time= (1 : 60*sRate )./sRate; %1: sRate*5*60 +2*sRate;
+exp= -1.5;
+signal= zeros(size(time));
+for ii = 1: length(freqs)
+     pwr = freqs(ii)^exp;
+     signal= signal + sqrt(pwr) *sin(2*pi*freqs(ii)*time + rand(1)*2*pi ) ; % + randn(size(time)).*sqrt(pwr)
+end
 
-% here, we generate 5 minutes of dummy data, with a 1/f^2 decay, alpha and beta oscillations
-sRate= 1450;
-dataPoints= 1: sRate*5*60 +2*sRate;
-myEEGch=  randn(1,dataPoints(end)); 
-myEEGch= smooth( myEEGch, sRate*2)'; 
-for ff= [ 9:0.05:11  18:0.05:24] 
-    myEEGch= myEEGch+ sin( 2*pi*ff/sRate.*dataPoints)/20/(ff^2); 
-end 
-myEEGch= myEEGch(sRate+1:end-sRate);
+%%% add to the signal alpha and beta oscillations , leading to two bell-shaped peaks in the PSD
+pks= [8 13; 16 24];
+for fb= 1 : size(pks,1)
+    ampFac= hamming(200);
+    ffs= linspace(pks(fb,1) , pks(fb,2) ,200);
+    for ii= 1 : 200;  
+        amp = 60/( ffs(ii)^ 1.75)* ampFac(ii); % 60 1.75  % 90 2
+        signal= signal+ sin( 2*pi* ffs(ii)*time + rand(1)*2*pi )*  amp;
+    end
+end
+% figure, plot(signal)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+````
+now that you have generated a fake signal (or imported a real signal), you can compute the PSD
+and estimate the spectral exponent in a given frequency range (1-40 Hz)
 
-
+````matlab
 % first compute the PSD
- epLen= 3* sRate; epShift= 1*sRate;numFFT=[];
- [myPSD,frex]= pwelch( myEEGch  , epLen, epShift,numFFT, sRate); 
+ epLen= 3* sRate; epShift= 1*sRate; numFFT=[];
+ [myPSD,frex]= pwelch( signal  , epLen, epShift,numFFT, sRate); 
  
  frBand=[1 40];
  frBins= dsearchn( frex, frBand(1) ):  dsearchn( frex, frBand(2));
@@ -41,7 +64,7 @@ myEEGch= myEEGch(sRate+1:end-sRate);
  [intSlo, stat, Pows, Deviants,  stat0, intSlo0] = fitPowerLaw3steps(XX,YY, robRegMeth,  doPlot, thisCol)
  spectralExponent= intSlo(2);
  
- % repeat for every electrode to obtain the average spectral exponent across the scalp
+ % repeat for every scalp electrode, and compute the average spectral exponent across the scalp
 
 %% fitPowerLaw3steps %%
 
