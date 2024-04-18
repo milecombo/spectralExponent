@@ -160,7 +160,7 @@ slope, inter, stats, vectors = compute_SpectralExponent(XX, YY, do_plot=True)
 
 
 
-![PSD of fake signal](Figure_1_PSD_exponent fit0_and_fit1.png)
+![PSD of fake signal](Figure_1_PSD_exponent_fit0_and_fit1.png)
 ### PSD and estimates of the spectral exponent (preliminary vs excluding peaks) of a generated EEG-looking signal
 This generated EEG signal has a theoretical PSD spectral exponent of -1.5. 
 As you can see, the first preliminary/naive fit (in the legend> slope fit0, grey dotted line) of the whole PSD is biased by the peaks in the alpha and beta frequency bands.
