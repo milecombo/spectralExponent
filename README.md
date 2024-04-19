@@ -110,8 +110,10 @@ and estimate the spectral exponent in a given frequency range (1-40 Hz)
 % intSlo(2) slope of 2nd (final) powerLaw Fit
 ````
 
+Many thanks to ![Gianluca Gaglioti](https://github.com/gianlucagag) for providing the translation of the orginal Matlab code into Python language.
 ## USE EXAMPLE (PYTHON)
-First, generate 1 minute of an EEG-looking signal ( or use one channel of your own clean EEG signal)
+First, generate 1 minute of an EEG-looking signal ( or use one channel of your own clean EEG signal).
+
 ````python
 # # HOW TO USE THIS CODE ON A GENERATED EEG SIGNAL
 
